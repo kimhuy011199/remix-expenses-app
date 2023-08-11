@@ -1,0 +1,21 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: Outfit;
+  }
+}
+
+@layer utilities {
+  .bg-main {
+    background-image: radial-gradient(at 77% 37%, #677391 0, transparent 50%);
+  }
+}
+
+.active {
+  @apply border-b-[3px] border-b-indigo-500 text-indigo-500 hover:!border-b-indigo-500 hover:!text-indigo-500;
+}

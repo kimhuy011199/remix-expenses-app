@@ -69,3 +69,5 @@ export default function Index() {
     </div>
   );
 }
+
+export const handle = { disabledJS: true };

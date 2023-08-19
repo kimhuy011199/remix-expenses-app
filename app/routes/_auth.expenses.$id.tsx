@@ -1,8 +1,13 @@
-import type { V2_MetaFunction } from '@remix-run/node';
-import { useNavigate } from '@remix-run/react';
-import ExpenseForm from '~/components/expenses/ExpenseForm';
+import type { Expense } from '@prisma/client';
+import { json, redirect } from '@remix-run/node';
+import type { LoaderArgs, ActionArgs, V2_MetaFunction } from '@remix-run/node';
+import { Outlet, useMatches, useParams } from '@remix-run/react';
+import { validationError } from 'remix-validated-form';
+import ExpenseForm, { validator } from '~/components/expenses/ExpenseForm';
 import Modal from '~/components/shared/Modal';
-import { DUMMY_EXPENSES } from './_auth.expenses';
+import { ToastError } from '~/components/shared/ToastError';
+import { deleteExpense, updateExpense } from '~/utils/expense.server';
+import { requireUserId } from '~/utils/session.server';
 
 export const meta: V2_MetaFunction = () => {
   return [
@@ -11,22 +16,68 @@ export const meta: V2_MetaFunction = () => {
   ];
 };
 
-export default function Index() {
-  const navigate = useNavigate();
+export const loader = async ({ request }: LoaderArgs) => {
+  await requireUserId(request);
+  return json({});
+};
 
-  const handleClose = () => {
-    navigate('..');
-  };
+const handleUpdate = async (request: any, expenseId: any) => {
+  const result = await validator.validate(await request.formData());
+
+  if (result.error) {
+    return validationError(result.error);
+  }
+
+  if (expenseId) {
+    await updateExpense(expenseId, { ...result.data });
+  }
+
+  return redirect('/expenses');
+};
+
+const handleDelete = async (expenseId: any) => {
+  await deleteExpense(expenseId);
+  return redirect('/expenses');
+};
+
+export const action = async ({ request, params }: ActionArgs) => {
+  const expenseId = params.id;
+
+  switch (request.method) {
+    case 'PATCH':
+      return handleUpdate(request, expenseId);
+
+    case 'DELETE':
+      return handleDelete(expenseId);
+
+    default:
+      break;
+  }
+};
+
+export default function Index() {
+  const params = useParams();
+  const matches = useMatches();
+
+  const expensesList = matches.find(
+    (item) => item.id === 'routes/_auth.expenses'
+  )?.data;
+  const expense = expensesList.find((item: Expense) => item.id === params.id);
+
+  if (!expense) {
+    return null;
+  }
 
   return (
     <>
-      <Modal onClose={handleClose}>
-        <ExpenseForm
-          onClose={handleClose}
-          title="Create expense"
-          defaultValue={DUMMY_EXPENSES[1]}
-        />
+      <Modal>
+        <ExpenseForm title="Update expense" defaultValue={expense} />
       </Modal>
+      <Outlet />
     </>
   );
+}
+
+export function ErrorBoundary() {
+  return <ToastError />;
 }

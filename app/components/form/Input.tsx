@@ -4,10 +4,12 @@ type InputProps = {
   name: string;
   label: string;
   iconSrc: string;
+  type?: string;
+  placeholder?: string;
 };
 
 const Input = (props: InputProps) => {
-  const { name, label, iconSrc } = props;
+  const { name, label, iconSrc, type = 'text', placeholder } = props;
   const { error, getInputProps } = useField(name);
 
   return (
@@ -20,8 +22,9 @@ const Input = (props: InputProps) => {
           <img className="w-5 h-5" src={iconSrc} alt="alt" />
         </div>
         <input
-          type="text"
+          type={type}
           name={name}
+          placeholder={placeholder}
           id={name}
           className={`bg-slate-800 block w-full rounded-md border-0 py-1.5 px-3 pl-10 text-gray-100 ring-1 ring-inset focus:outline-none focus:ring-2 focus:ring-inset ${
             error

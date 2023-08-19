@@ -1,4 +1,6 @@
-import { NavLink } from '@remix-run/react';
+import { NavLink, useSubmit } from '@remix-run/react';
+import Logo from '../shared/Logo';
+import { useUser } from '~/hooks/useRootUser';
 
 export interface NavLinkInterface {
   id: number;
@@ -12,12 +14,24 @@ const AuthenticatedNavigation = () => {
     { id: 2, label: 'Analyze Expenses', link: '/expenses/analyze' },
   ];
 
+  const submit = useSubmit();
+  const user = useUser();
+
+  const handleLogout = () => {
+    submit(null, {
+      method: 'post',
+      action: '/logout',
+    });
+  };
+
   return (
-    <div className="border-b border-b-gray-800 bg-[#111827]">
-      <div className="w-full mx-auto max-w-4xl flex justify-between">
-        <div></div>
+    <div className="border-b border-b-gray-800 bg-[#111827] py-4 md:py-0">
+      <div className="w-full mx-auto max-w-4xl flex justify-between items-center px-4">
+        <div>
+          <Logo />
+        </div>
         <nav>
-          <ul className="flex gap-10">
+          <ul className="hidden md:flex gap-10">
             {navLinks.map((item: NavLinkInterface) => (
               <li key={item.id} className="py-4">
                 <NavLink
@@ -31,7 +45,15 @@ const AuthenticatedNavigation = () => {
             ))}
           </ul>
         </nav>
-        <div></div>
+        <div className="flex gap-2">
+          <span className="font-normal">{user.username}</span>
+          <button
+            className="text-gray-400 hover:text-gray-100"
+            onClick={handleLogout}
+          >
+            (logout)
+          </button>
+        </div>
       </div>
     </div>
   );

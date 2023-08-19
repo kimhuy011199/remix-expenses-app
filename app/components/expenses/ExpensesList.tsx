@@ -1,8 +1,13 @@
+import type { Expense } from '~/utils/expense.server';
 import LinkButton from '../shared/LinkButton';
 import ExpenseEmpty from './ExpenseEmpty';
 import ExpenseItem from './ExpenseItem';
 
-const ExpensesList = (props: any) => {
+interface ExpensesListProps {
+  expensesList: Expense[];
+}
+
+const ExpensesList = (props: ExpensesListProps) => {
   const { expensesList } = props;
 
   if (!expensesList.length) {

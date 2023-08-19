@@ -1,15 +1,18 @@
 interface SubmitButtonProps {
-  isSubmitting: boolean;
+  isDisabled: boolean;
   label: string;
+  type?: 'submit' | 'button';
+  handleClick?: () => void;
 }
 
 const SubmitButton = (props: SubmitButtonProps) => {
-  const { isSubmitting, label } = props;
+  const { isDisabled, label, type = 'submit', handleClick = undefined } = props;
 
   return (
     <button
-      type="submit"
-      disabled={isSubmitting}
+      onClick={handleClick}
+      type={type}
+      disabled={isDisabled}
       className="inline-flex justify-center rounded-md bg-indigo-500 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-400 w-auto disabled:cursor-not-allowed disabled:opacity-30"
     >
       {label}

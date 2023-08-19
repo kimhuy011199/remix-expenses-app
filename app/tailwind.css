@@ -19,3 +19,11 @@
 .active {
   @apply border-b-[3px] border-b-indigo-500 text-indigo-500 hover:!border-b-indigo-500 hover:!text-indigo-500;
 }
+
+.Toastify__toast-theme--dark {
+  @apply !border !border-indigo-500 !bg-indigo-700 !font-['Outfit'];
+}
+
+.Toastify__toast-theme--dark.Toastify__toast--error {
+  @apply !border !border-red-500 !bg-red-700;
+}

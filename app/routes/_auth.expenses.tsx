@@ -1,29 +1,9 @@
-import type { V2_MetaFunction } from '@remix-run/node';
-import { Outlet } from '@remix-run/react';
+import { json } from '@remix-run/node';
+import type { LoaderArgs, V2_MetaFunction } from '@remix-run/node';
+import { Outlet, useLoaderData } from '@remix-run/react';
+import { getExpenses } from '~/utils/expense.server';
 import ExpensesList from '~/components/expenses/ExpensesList';
-
-export const DUMMY_EXPENSES = [
-  {
-    id: 1,
-    title: 'Buy coffee',
-    amount: 10,
-    date: '22-08-2023',
-  },
-  {
-    id: 2,
-    title: 'Buy books',
-    amount: 20.22,
-    date: '02-08-2023',
-  },
-  {
-    id: 3,
-    title: 'Go to the cinema',
-    amount: 900,
-    date: '02-08-2023',
-  },
-];
-
-const DUMMY_EXPENSES_EMPTY = [];
+import { requireUserId } from '~/utils/session.server';
 
 export const meta: V2_MetaFunction = () => {
   return [
@@ -32,10 +12,18 @@ export const meta: V2_MetaFunction = () => {
   ];
 };
 
+export const loader = async ({ request }: LoaderArgs) => {
+  const userId = await requireUserId(request);
+  const expensesList = await getExpenses(userId);
+  return json(expensesList);
+};
+
 export default function Index() {
+  const data = useLoaderData<typeof loader>();
+
   return (
     <div className="w-full max-w-xl mx-auto mt-12 px-4">
-      <ExpensesList expensesList={DUMMY_EXPENSES} />
+      <ExpensesList expensesList={data} />
       <Outlet />
     </div>
   );

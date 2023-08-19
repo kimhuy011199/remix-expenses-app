@@ -1,11 +1,10 @@
-import type { V2_MetaFunction } from '@remix-run/node';
-import { Link } from '@remix-run/react';
-import { withZod } from '@remix-validated-form/with-zod';
-import { ValidatedForm } from 'remix-validated-form';
-import { z } from 'zod';
-import Input from '~/components/form/Input';
-import SubmitButton from '~/components/form/SubmitButton';
-import Logo from '~/components/shared/Logo';
+import { json, redirect } from '@remix-run/node';
+import type { LoaderArgs, ActionArgs, V2_MetaFunction } from '@remix-run/node';
+import { compare } from 'bcryptjs';
+import { validationError } from 'remix-validated-form';
+import AuthForm, { validator } from '~/components/auth/AuthForm';
+import { createUserSession, getUserId } from '~/utils/session.server';
+import { getUser } from '~/utils/user.server';
 
 export const meta: V2_MetaFunction = () => {
   return [
@@ -14,41 +13,54 @@ export const meta: V2_MetaFunction = () => {
   ];
 };
 
-export const validator = withZod(
-  z.object({
-    username: z.string().min(1, { message: 'Username is required' }),
-    password: z
-      .string()
-      .min(6, { message: 'Password must be at least 6 characters' }),
-  })
-);
+export const loader = async ({ request }: LoaderArgs) => {
+  const userId = await getUserId(request);
+  if (userId) {
+    return redirect('/expenses');
+  }
+  return json({});
+};
+
+export const action = async ({ request }: ActionArgs) => {
+  const formData = await request.formData();
+  const redirectTo = formData.get('redirectTo')?.toString() || '/expenses';
+
+  const result = await validator.validate(formData);
+
+  if (result.error) {
+    return validationError(result.error);
+  }
+
+  const { username, password } = result.data;
+  const user = await getUser(username);
+
+  if (!user) {
+    return json({ msg: 'User is not existed' }, { status: 401 });
+  }
+
+  const isCorrectPassword = await compare(password, user.password);
+
+  if (!isCorrectPassword) {
+    return json({ msg: 'Password does not match' }, { status: 400 });
+  }
+
+  return createUserSession({
+    redirectTo,
+    remember: false,
+    request,
+    userId: user.id,
+  });
+};
 
 export default function Index() {
   return (
-    <div className="mx-auto max-w-sm w-full">
-      <ValidatedForm validator={validator} method="post">
-        <div className="px-5 py-3 flex flex-col items-center justify-center mt-20 gap-8">
-          <Logo />
-          <h2 className="text-center font-normal text-2xl">
-            Login to your account
-          </h2>
-        </div>
-        <div className="px-5 py-3 flex flex-col gap-3">
-          <Input name="username" label="Username" iconSrc="/assets/user.svg" />
-          <Input
-            name="password"
-            label="Password"
-            iconSrc="/assets/password.svg"
-          />
-          <SubmitButton label="Login" isSubmitting={false} />
-        </div>
-      </ValidatedForm>
-      <div className="flex justify-center text-center gap-2 mt-2">
-        <span>Not a member?</span>
-        <Link className="text-indigo-500 font-normal" to="/register">
-          Create new account
-        </Link>
-      </div>
-    </div>
+    <AuthForm
+      action="/login"
+      heading="Login to continue"
+      optionText="Don't have an account?"
+      optionAction="Register"
+      optionLink="/register"
+      btnLabel="Login"
+    />
   );
 }

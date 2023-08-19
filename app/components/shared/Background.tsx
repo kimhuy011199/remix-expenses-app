@@ -1,4 +1,4 @@
-const Backround = () => {
+const Background = () => {
   return (
     <>
       <div className="absolute inset-0 -z-10 overflow-hidden bg-main opacity-20">
@@ -30,4 +30,4 @@ const Backround = () => {
   );
 };
 
-export default Backround;
+export default Background;

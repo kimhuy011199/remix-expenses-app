@@ -1,8 +1,12 @@
-import type { ActionArgs, V2_MetaFunction } from '@remix-run/node';
-import { useNavigate } from '@remix-run/react';
+import { json, redirect } from '@remix-run/node';
+import type { LoaderArgs, ActionArgs, V2_MetaFunction } from '@remix-run/node';
 import { validationError } from 'remix-validated-form';
 import ExpenseForm, { validator } from '~/components/expenses/ExpenseForm';
 import Modal from '~/components/shared/Modal';
+import { ToastError } from '~/components/shared/ToastError';
+import getCurrentDate from '~/functions/getCurrentDate';
+import { createExpense } from '~/utils/expense.server';
+import { requireUserId } from '~/utils/session.server';
 
 export const meta: V2_MetaFunction = () => {
   return [
@@ -11,31 +15,43 @@ export const meta: V2_MetaFunction = () => {
   ];
 };
 
+export const loader = async ({ request }: LoaderArgs) => {
+  await requireUserId(request);
+  return json({});
+};
+
 export const action = async ({ request }: ActionArgs) => {
-  await new Promise((resolve) => setTimeout(resolve, 3000));
+  const userId = await requireUserId(request);
   const result = await validator.validate(await request.formData());
 
   if (result.error) {
     return validationError(result.error);
   }
 
-  console.log('result.data', result.data);
+  await createExpense({ ...result.data }, userId);
 
-  return null;
+  return redirect('/expenses');
 };
 
 export default function Index() {
-  const navigate = useNavigate();
-
-  const handleClose = () => {
-    navigate('..');
-  };
+  const date = getCurrentDate();
 
   return (
     <>
-      <Modal onClose={handleClose}>
-        <ExpenseForm onClose={handleClose} title="Create expense" />
+      <Modal>
+        <ExpenseForm
+          title="Create expense"
+          defaultValue={{
+            title: '',
+            amount: '',
+            date,
+          }}
+        />
       </Modal>
     </>
   );
+}
+
+export function ErrorBoundary() {
+  return <ToastError />;
 }

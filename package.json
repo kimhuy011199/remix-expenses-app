@@ -8,20 +8,25 @@
     "typecheck": "tsc"
   },
   "dependencies": {
+    "@prisma/client": "^5.1.1",
     "@remix-run/css-bundle": "^1.19.2",
     "@remix-run/node": "^1.19.2",
     "@remix-run/react": "^1.19.2",
     "@remix-run/serve": "^1.19.2",
     "@remix-validated-form/with-zod": "^2.0.6",
+    "bcryptjs": "^2.4.3",
     "isbot": "^3.6.8",
+    "prisma": "^5.1.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-toastify": "^9.1.3",
     "remix-validated-form": "^5.0.2",
     "zod": "^3.21.4"
   },
   "devDependencies": {
     "@remix-run/dev": "^1.19.2",
     "@remix-run/eslint-config": "^1.19.2",
+    "@types/bcryptjs": "^2.4.2",
     "@types/react": "^18.0.35",
     "@types/react-dom": "^18.0.11",
     "eslint": "^8.38.0",

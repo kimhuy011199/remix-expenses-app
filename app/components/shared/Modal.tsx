@@ -1,12 +1,17 @@
+import { useNavigate } from '@remix-run/react';
 import type { ReactNode } from 'react';
 
 interface ModalProps {
   children: ReactNode;
-  onClose: () => void;
 }
 
 const Modal = (props: ModalProps) => {
-  const { children, onClose } = props;
+  const { children } = props;
+  const navigate = useNavigate();
+
+  const handleClose = () => {
+    navigate('..');
+  };
 
   return (
     <div
@@ -14,7 +19,7 @@ const Modal = (props: ModalProps) => {
       aria-labelledby="modal-title"
       role="dialog"
       aria-modal="true"
-      onClick={onClose}
+      onClick={handleClose}
     >
       <div className="fixed inset-0 bg-gray-800 bg-opacity-90 transition-opacity"></div>
       <div className="fixed inset-0 z-10 overflow-hidden">
